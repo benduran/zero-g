@@ -1,2 +1,2 @@
 
-export { default as panner } from './panner';
+export { default as createZeroG } from './zeroG';

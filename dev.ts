@@ -1,6 +1,6 @@
 
-import { panner } from './src';
-import { PannerInstance } from './src/panner';
+import { createZeroG } from './src';
+import { ZeroGInstance } from './src/zeroG';
 
 const elem = document.getElementById('dev');
 
@@ -8,7 +8,7 @@ if (!elem) throw new Error('Cannot run dev page because DOM element root was mis
 
 declare global {
   interface Window {
-    pannerInstance: PannerInstance;
+    pannerInstance: ZeroGInstance;
     ZOOM_LEVEL: number;
     ZOOM_STEP: number;
   }
@@ -20,7 +20,7 @@ const zoomInBtn = document.getElementById('zoomIn')!;
 const zoomOutBtn = document.getElementById('zoomOut')!;
 const currentScaleBtn = document.getElementById('currentScale')!;
 
-const pannerInstance = panner(elem, {
+const pannerInstance = createZeroG(elem, {
   onScaleChange: (scale) => {
     currentScaleBtn.innerHTML = `${(scale * 100).toFixed(0)}%`;
     window.ZOOM_LEVEL = scale;
