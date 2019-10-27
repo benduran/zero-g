@@ -29,6 +29,7 @@
     "./node_modules"
   ],
   "include": [
+    "./dev.ts",
     "./src"
   ]
 }

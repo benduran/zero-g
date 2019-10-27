@@ -9,12 +9,13 @@
   "types": "dist/esm/index.d.ts",
   "scripts": {
     "typecheck": "tsc --project ./tsconfig.json --noEmit",
+    "typecheck:dev": "tsc --project ./tsconfig.json --noEmit --watch",
     "build:commonjs": "tsc --project ./tsconfig.json",
     "build:esm": "tsc --project ./tsconfig.esm.json",
     "clean": "rimraf ./dist",
     "build": "run-s clean typecheck build:commonjs build:esm",
     "dev:parcel": "parcel ./index.dev.html --out-file index.html",
-    "dev": "run-s typecheck dev:parcel",
+    "dev": "run-p dev:parcel typecheck:dev",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -37,6 +38,7 @@
   },
   "homepage": "https://github.com/benduran/zero-g#readme",
   "devDependencies": {
+    "@types/parcel-bundler": "^1.12.1",
     "npm-run-all": "^4.1.5",
     "parcel-bundler": "^1.12.4",
     "rimraf": "^3.0.0",
