@@ -112,13 +112,13 @@ export class ZeroGInstance {
     else this.element.style.cursor = 'grab';
   }
 
-  private doPan(e: MouseEvent) {
-    const deltaX = this.lastX !== null ? e.pageX - this.lastX : 0;
-    const deltaY = this.lastY !== null ? e.pageY - this.lastY : 0;
+  private doPan(pageX: number, pageY: number) {
+    const deltaX = this.lastX !== null ? pageX - this.lastX : 0;
+    const deltaY = this.lastY !== null ? pageY - this.lastY : 0;
     this.element.style.top = toPx(this.element.offsetTop + deltaY);
     this.element.style.left = toPx(this.element.offsetLeft + deltaX);
-    this.lastX = e.pageX;
-    this.lastY = e.pageY;
+    this.lastX = pageX;
+    this.lastY = pageY;
   }
 
   private preventDrag = (e: DragEvent) => {
@@ -133,7 +133,7 @@ export class ZeroGInstance {
 
   private handleMouseUp = (e: MouseEvent) => {
     if (this.options.onPanEnd) this.options.onPanEnd({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
-    this.lastX = this.lastY = null;
+    this.clearLast();
     this.mousedown = false;
     if (this.options.changeCursorOnPan) this.swapMouseCursor();
   }
@@ -141,7 +141,7 @@ export class ZeroGInstance {
   private handleMouseMove = (e: MouseEvent) => {
     if (this.mousedown) {
       if (this.options.onPanMove) this.options.onPanMove({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
-      this.doPan(e);
+      this.doPan(e.pageX, e.pageY);
     }
   }
 
@@ -194,6 +194,14 @@ export class ZeroGInstance {
     this.element.style.height = toPx(newHeight);
     this.element.style.width = toPx(newWidth);
     if (this.options.onScaleChange) this.options.onScaleChange(this.currentScale);
+  }
+
+  pan(x: number, y: number) {
+    this.doPan(x, y);
+  }
+
+  clearLast() {
+    this.lastX = this.lastY = null;
   }
 }
 
