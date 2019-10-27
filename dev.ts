@@ -5,4 +5,6 @@ const elem = document.getElementById('dev');
 
 if (!elem) throw new Error('Cannot run dev page because DOM element root was missing');
 
-console.info(elem);
+const pannerInstance = panner(elem);
+
+console.info(pannerInstance);

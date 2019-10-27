@@ -14,10 +14,10 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
 
+    "strictPropertyInitialization": false,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noImplicitReturns": true,

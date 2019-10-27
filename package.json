@@ -8,11 +8,13 @@
   "typings": "dist/esm/index.d.ts",
   "types": "dist/esm/index.d.ts",
   "scripts": {
+    "typecheck": "tsc --project ./tsconfig.json --noEmit",
     "build:commonjs": "tsc --project ./tsconfig.json",
     "build:esm": "tsc --project ./tsconfig.esm.json",
     "clean": "rimraf ./dist",
-    "build": "run-s clean build:commonjs build:esm",
-    "dev": "parcel ./index.dev.html --out-file index.html",
+    "build": "run-s clean typecheck build:commonjs build:esm",
+    "dev:parcel": "parcel ./index.dev.html --out-file index.html",
+    "dev": "run-s typecheck dev:parcel",
     "prepublishOnly": "npm run build"
   },
   "repository": {
