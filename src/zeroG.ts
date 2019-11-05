@@ -36,6 +36,7 @@ export class ZeroGInstance {
   private lastY: number | null = null;
   private zoom: number | null = null;
   private mousedown: boolean = false;
+  private hasLoadHandler: boolean = false;
   private windowResizeTimeout: any;
 
   private naturalHeight: number;
@@ -54,6 +55,10 @@ export class ZeroGInstance {
   }
 
   private bindHandlers() {
+    if (this.element instanceof HTMLImageElement || this.element instanceof HTMLVideoElement) {
+      this.hasLoadHandler = true;
+      this.element.addEventListener('load', this.handleInitialLoad);
+    }
     this.element.addEventListener('mousedown', this.handleMouseDown);
     this.element.addEventListener('dragstart', this.preventDrag);
     document.addEventListener('mouseup', this.handleMouseUp);
@@ -62,6 +67,10 @@ export class ZeroGInstance {
   }
 
   private unbindHandlers() {
+    if (this.hasLoadHandler) {
+      this.hasLoadHandler = false;
+      this.element.removeEventListener('load', this.handleInitialLoad);
+    }
     this.element.removeEventListener('mousedown', this.handleMouseDown);
     document.removeEventListener('mouseup', this.handleMouseUp);
     document.removeEventListener('mousemove', this.handleMouseMove);
@@ -86,6 +95,7 @@ export class ZeroGInstance {
     this.element.style.willChange = 'top, left, width, height';
     if (this.options.changeCursorOnPan) this.swapMouseCursor();
     this.bindHandlers();
+    this.queueInitialFit();
   }
 
   private fitLandscape() {
@@ -150,6 +160,10 @@ export class ZeroGInstance {
     this.windowResizeTimeout = setTimeout(() => this.zoomFit(), 1);
   }
 
+  private handleInitialLoad = () => {
+    this.fit();
+  }
+
   private fit() {
     switch (this.orientation) {
       case Orientation.Landscape:
@@ -166,6 +180,12 @@ export class ZeroGInstance {
     }
     this.adjustIfOverflown();
     if (this.options.onScaleChange) this.options.onScaleChange(this.currentScale);
+  }
+
+  private queueInitialFit() {
+    if (this.element instanceof HTMLImageElement || this.element instanceof HTMLVideoElement) {
+      this.element.addEventListener('load', this.handleInitialLoad);
+    }
   }
 
   destroy() {
