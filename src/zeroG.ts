@@ -43,9 +43,8 @@ export class ZeroGInstance {
   private naturalWidth: number;
   private orientation: Orientation;
   private parent: HTMLElement;
-  private options: IPannerOptions;
 
-  constructor(private element: HTMLElement, options: IPannerOptions = defaultPannerOptions) {
+  constructor(private element: HTMLElement, private options: IPannerOptions = defaultPannerOptions, private controlledByDockingProcedure: boolean = false) {
     this.options = { ...defaultPannerOptions, ...options };
     this.init();
   }
@@ -122,9 +121,9 @@ export class ZeroGInstance {
     else this.element.style.cursor = 'grab';
   }
 
-  private doPan(pageX: number, pageY: number) {
-    const deltaX = this.lastX !== null ? pageX - this.lastX : 0;
-    const deltaY = this.lastY !== null ? pageY - this.lastY : 0;
+  private doPan(pageX: number, pageY: number, lastX: number | null = this.lastX, lastY: number | null = this.lastY) {
+    const deltaX = lastX !== null ? pageX - lastX : 0;
+    const deltaY = lastY !== null ? pageY - lastY : 0;
     this.element.style.top = toPx(this.element.offsetTop + deltaY);
     this.element.style.left = toPx(this.element.offsetLeft + deltaX);
     this.lastX = pageX;
@@ -151,7 +150,7 @@ export class ZeroGInstance {
   private handleMouseMove = (e: MouseEvent) => {
     if (this.mousedown) {
       if (this.options.onPanMove) this.options.onPanMove({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
-      this.doPan(e.pageX, e.pageY);
+      if (!this.controlledByDockingProcedure) this.doPan(e.pageX, e.pageY);
     }
   }
 
@@ -192,6 +191,10 @@ export class ZeroGInstance {
     this.unbindHandlers();
   }
 
+  controlledPan(panEvent: IPanEvent) {
+    this.pan(panEvent.x, panEvent.y, panEvent.lastX, panEvent.lastY);
+  }
+
   set<K extends keyof IPannerOptions>(prop: K, val: IPannerOptions[K], reinit: boolean = false) {
     if (allowedPannerOptionKeys.indexOf(prop) > -1) {
       this.options[prop] = val;
@@ -216,8 +219,8 @@ export class ZeroGInstance {
     if (this.options.onScaleChange) this.options.onScaleChange(this.currentScale);
   }
 
-  pan(x: number, y: number) {
-    this.doPan(x, y);
+  pan(x: number, y: number, lastX: number | null, lastY: number | null) {
+    this.doPan(x, y, lastX, lastY);
   }
 
   clearLast() {
