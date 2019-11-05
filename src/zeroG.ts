@@ -75,8 +75,7 @@ export class ZeroGInstance {
     document.removeEventListener('mousemove', this.handleMouseMove);
   }
 
-  private init() {
-    this.parent = this.element.parentElement!;
+  private computeNaturalDimensions() {
     if (this.element instanceof HTMLImageElement) {
       this.naturalHeight = this.element.naturalHeight;
       this.naturalWidth = this.element.naturalWidth;
@@ -87,6 +86,11 @@ export class ZeroGInstance {
       this.naturalHeight = this.element.clientHeight;
       this.naturalWidth = this.element.clientWidth;
     }
+  }
+
+  private init() {
+    this.parent = this.element.parentElement!;
+    this.computeNaturalDimensions();
     if (this.naturalWidth > this.naturalHeight) this.orientation = Orientation.Landscape;
     else if (this.naturalHeight > this.naturalWidth) this.orientation = Orientation.Portrait;
     else this.orientation = Orientation.Square;
@@ -160,6 +164,7 @@ export class ZeroGInstance {
   }
 
   private handleInitialLoad = () => {
+    this.computeNaturalDimensions();
     this.fit();
   }
 
@@ -178,11 +183,13 @@ export class ZeroGInstance {
         break;
     }
     this.adjustIfOverflown();
+    console.info(this.currentScale);
     if (this.options.onScaleChange) this.options.onScaleChange(this.currentScale);
   }
 
   private queueInitialFit() {
     if (this.element instanceof HTMLImageElement || this.element instanceof HTMLVideoElement) {
+      // this.element.onload = this.handleInitialLoad;
       this.element.addEventListener('load', this.handleInitialLoad);
     }
   }
