@@ -1,6 +1,6 @@
 {
   "name": "zero-g",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A utility library for efficiently adding panning and zooming capabilities to any DOM element. Comes with out-of-the-box TypeScript typings!",
   "main": "dist/commonjs/index.js",
   "module": "dist/esm/index.js",
