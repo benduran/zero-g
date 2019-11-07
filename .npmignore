@@ -59,3 +59,11 @@ typings/
 
 # next.js build output
 .next
+tslint.json
+tsconfig.json
+tsconfig.esm.json
+index.dev.html
+index.synchronized.html
+.editorconfig
+.gitignore
+.cache
