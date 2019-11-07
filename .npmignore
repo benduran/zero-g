@@ -59,6 +59,7 @@ typings/
 
 # next.js build output
 .next
+
 tslint.json
 tsconfig.json
 tsconfig.esm.json
@@ -67,3 +68,6 @@ index.synchronized.html
 .editorconfig
 .gitignore
 .cache
+src/
+dev.synchronized.ts
+dev.ts
