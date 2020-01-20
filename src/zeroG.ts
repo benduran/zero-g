@@ -183,7 +183,6 @@ export class ZeroGInstance {
         break;
     }
     this.adjustIfOverflown();
-    console.info(this.currentScale);
     if (this.options.onScaleChange) this.options.onScaleChange(this.currentScale);
   }
 
