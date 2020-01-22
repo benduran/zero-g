@@ -193,15 +193,15 @@ export class ZeroGInstance {
     }
   }
 
-  destroy() {
+  public destroy() {
     this.unbindHandlers();
   }
 
-  controlledPan(panEvent: IPanEvent) {
+  public controlledPan(panEvent: IPanEvent) {
     this.pan(panEvent.x, panEvent.y, panEvent.lastX, panEvent.lastY);
   }
 
-  set<K extends keyof IPannerOptions>(prop: K, val: IPannerOptions[K], reinit: boolean = false) {
+  public set<K extends keyof IPannerOptions>(prop: K, val: IPannerOptions[K], reinit: boolean = false) {
     if (allowedPannerOptionKeys.indexOf(prop) > -1) {
       this.options[prop] = val;
       if (reinit) {
@@ -211,12 +211,12 @@ export class ZeroGInstance {
     }
   }
 
-  zoomFit() {
+  public zoomFit() {
     this.zoom = null;
     this.fit();
   }
 
-  zoomInOut(level: number) {
+  public zoomInOut(level: number) {
     this.zoom = level;
     const newHeight = this.naturalHeight * this.zoom;
     const newWidth = this.naturalWidth * this.zoom;
@@ -225,12 +225,20 @@ export class ZeroGInstance {
     if (this.options.onScaleChange) this.options.onScaleChange(this.currentScale);
   }
 
-  pan(x: number, y: number, lastX: number | null, lastY: number | null) {
+  public pan(x: number, y: number, lastX: number | null, lastY: number | null) {
     this.doPan(x, y, lastX, lastY);
   }
 
-  clearLast() {
+  public clearLast() {
     this.lastX = this.lastY = null;
+  }
+
+  public getElement() {
+    return this.element;
+  }
+
+  public getParent() {
+    return this.parent;
   }
 }
 

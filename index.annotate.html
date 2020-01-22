@@ -1,0 +1,68 @@
+<!DOCTYPE html />
+<html>
+  <head>
+    <title>Zero-G Dev - Annotation</title>
+    <meta charset="utf8" />
+    <style>
+      :root {
+        --button-color: #8800ff;
+        --button-width: 64px;
+      }
+      body {
+        font-size: 16px;
+        margin: 0;
+        padding: 0;
+      }
+      #buttons {
+        height: 64px;
+        left: 0;
+        position: fixed;
+        right: 0;
+        text-align: center;
+        top: 0;
+      }
+      #buttons > button {
+        background-color: transparent;
+        border: 2px solid var(--button-color);
+        color: var(--button-color);
+        font-size: 1.2em;
+        height: 100%;
+        margin: 0;
+        margin-right: .5em;
+        transition: background-color .2s ease, color .2s ease;
+        width: var(--button-width);
+      }
+      #buttons > button:hover {
+        background-color: var(--button-color);
+        color: #f7f7f7;
+        cursor: pointer;
+      }
+      #outer {
+        background-color: #aaa;
+        bottom: 10vh;
+        left: 10vw;
+        overflow: hidden;
+        position: fixed;
+        right: 10vw;
+        top: 10vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="buttons">
+      <button id="zoomIn" title="Zoom In" type="button">
+        +
+      </button>
+      <button id="currentScale" title="Click to Reset zoom" type="button">
+        -
+      </button>
+      <button id="zoomOut" title="Zoom Out" type="button">
+        -
+      </button>
+    </div>
+    <div id="outer">
+      <img alt="wall-e" src="https://i.pinimg.com/originals/05/1d/b9/051db99b019d8ab861c87ac76c04ed81.jpg" id="dev" />
+    </div>
+    <script src="./dev.annotate.ts"></script>
+  </body>
+</html>

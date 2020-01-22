@@ -15,8 +15,10 @@
     "build": "run-s clean typecheck build:commonjs",
     "dev:parcel:basic": "parcel ./index.dev.html --out-file index.html",
     "dev:parcel:synchronized": "parcel ./index.synchronized.html --out-file index.html",
+    "dev:parcel:annotate": "parcel ./index.annotate.html --out-file index.html",
     "dev:basic": "run-p dev:parcel:basic typecheck:dev",
     "dev:synchronized": "run-p dev:parcel:synchronized typecheck:dev",
+    "dev:annotate": "run-p dev:parcel:annotate typecheck:dev",
     "prepublishOnly": "npm run build",
     "test": "jest --env jsdom"
   },
