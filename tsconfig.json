@@ -6,7 +6,7 @@
     "lib": ["dom", "es2017"],
     "declaration": true,
     "sourceMap": true,
-    "outDir": "./dist/commonjs",
+    "outDir": "./dist",
     "removeComments": true,
 
     "strict": true,
