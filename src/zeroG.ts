@@ -13,9 +13,9 @@ export interface PannerOptions {
   refitOnResize?: boolean;
 
   onScaleChange?: (currentScale: number) => void;
-  onPanEnd?: (panEvent: PaneEvent, instance: ZeroGInstance) => void;
-  onPanMove?: (panEvent: PaneEvent, instance: ZeroGInstance) => void;
-  onPanStart?: (panEvent: PaneEvent, instance: ZeroGInstance) => void;
+  onPanEnd?: (panEvent: PanEvent, instance: ZeroGInstance) => void;
+  onPanMove?: (panEvent: PanEvent, instance: ZeroGInstance) => void;
+  onPanStart?: (panEvent: PanEvent, instance: ZeroGInstance) => void;
 }
 
 const defaultPannerOptions: PannerOptions = {
@@ -198,7 +198,7 @@ export class ZeroGInstance {
     this.unbindHandlers();
   }
 
-  public controlledPan(panEvent: PaneEvent): void {
+  public controlledPan(panEvent: PanEvent): void {
     this.pan(panEvent.x, panEvent.y, panEvent.lastX, panEvent.lastY);
   }
 
@@ -243,7 +243,7 @@ export class ZeroGInstance {
   }
 }
 
-export interface PaneEvent {
+export interface PanEvent {
   x: number;
   y: number;
   lastX: number | null;

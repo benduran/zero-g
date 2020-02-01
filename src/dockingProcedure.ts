@@ -1,7 +1,7 @@
 
-import createZeroG, { ZeroGInstance, IPannerOptions, IPanEvent } from './zeroG';
+import createZeroG, { ZeroGInstance, PannerOptions, PanEvent } from './zeroG';
 
-export interface IDockingProcedureOptions extends Omit<IPannerOptions, 'onScaleChange'> {
+export interface IDockingProcedureOptions extends Omit<PannerOptions, 'onScaleChange'> {
   onScaleChange?: (currentScale: number, sendingChildIndex: number) => void;
 }
 
@@ -27,7 +27,7 @@ export class DockingProcedureInstance {
   }
 
   private handlePanStart(childIndex: number) {
-    return (panEvent: IPanEvent, z: ZeroGInstance) => {
+    return (panEvent: PanEvent, z: ZeroGInstance) => {
       this.instances.forEach((z, i) => {
         if (i !== childIndex) z.controlledPan(panEvent);
       });
@@ -35,7 +35,7 @@ export class DockingProcedureInstance {
   }
 
   private handlePanEnd(childIndex: number) {
-    return (panEvent: IPanEvent, z: ZeroGInstance) => {
+    return (panEvent: PanEvent, z: ZeroGInstance) => {
       this.instances.forEach((z, i) => {
         if (i !== childIndex) z.controlledPan(panEvent);
       });

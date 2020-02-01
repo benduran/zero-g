@@ -1,5 +1,4 @@
 
-import { toPx } from './util';
 import { ZeroGInstance } from './zeroG';
 
 export enum AnnotationType {
