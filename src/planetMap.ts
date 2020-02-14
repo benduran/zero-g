@@ -78,7 +78,7 @@ export type AnyAnnotation = RectangleAnnotation | EllipseAnnotation | FreeformAn
 export class PlanetMapInstance {
   private annotationContainerElem: HTMLDivElement;
 
-  constructor(private zeroGInstance: ZeroGInstance, annotations: AnyAnnotation[] = []) {
+  constructor(private zeroGInstance: ZeroGInstance, private annotations: AnyAnnotation[] = []) {
     this.init();
   }
 
@@ -89,12 +89,22 @@ export class PlanetMapInstance {
     if (!p) throw new Error('Invalid instance of zeroG was provided. Instance is missing a parent DOM Element');
     p.appendChild(this.annotationContainerElem);
   }
+
+  private renderAnnotations() {
+    this.annotations.forEach((a) => {});
+  }
+
+  public setAnnotations(annotations: AnyAnnotation[]) {
+    this.annotations = annotations;
+  }
+
+  public appendAnnotation(annotation: AnyAnnotation) {
+    this.annotations = this.annotations.concat(annotation);
+    this.renderAnnotations();
+  }
 }
 
-export default function createPlanetMap(
-  zeroGInstance: ZeroGInstance,
-  initialAnnotations: AnyAnnotation[] = [],
-) {
+export default function createPlanetMap(zeroGInstance: ZeroGInstance) {
   if (!zeroGInstance) throw new Error('Unable to create an instance of Planet Map without a valid zeroG instance');
-  return new PlanetMapInstance(zeroGInstance, initialAnnotations);
+  return new PlanetMapInstance(zeroGInstance);
 }
