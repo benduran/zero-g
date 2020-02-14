@@ -32,11 +32,11 @@ const pannerInstance = createZeroG(elem, {
 const planetMap = createPlanetMap(pannerInstance);
 
 zoomInBtn.addEventListener('click', () => {
-  window.ZOOM_LEVEL = window.ZOOM_LEVEL + window.ZOOM_STEP;
+  window.ZOOM_LEVEL += window.ZOOM_STEP;
   pannerInstance.zoomInOut(window.ZOOM_LEVEL);
 });
 zoomOutBtn.addEventListener('click', () => {
-  window.ZOOM_LEVEL = window.ZOOM_LEVEL - window.ZOOM_STEP;
+  window.ZOOM_LEVEL -= window.ZOOM_STEP;
   pannerInstance.zoomInOut(window.ZOOM_LEVEL);
 });
 currentScaleBtn.addEventListener('click', () => {
