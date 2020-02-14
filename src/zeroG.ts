@@ -33,15 +33,23 @@ const allowedPannerOptionKeys = Object.keys(defaultPannerOptions);
 
 export class ZeroGInstance {
   private lastX: number | null = null;
+
   private lastY: number | null = null;
+
   private zoom: number | null = null;
+
   private mousedown = false;
+
   private hasLoadHandler = false;
+
   private windowResizeTimeout: NodeJS.Timeout | void;
 
   private naturalHeight: number;
+
   private naturalWidth: number;
+
   private orientation: Orientation;
+
   private parent: HTMLElement;
 
   constructor(private element: HTMLElement, private options: PannerOptions = defaultPannerOptions, private controlledByDockingProcedure: boolean = false) {
@@ -62,7 +70,7 @@ export class ZeroGInstance {
     this.element.addEventListener('dragstart', this.preventDrag);
     document.addEventListener('mouseup', this.handleMouseUp);
     document.addEventListener('mousemove', this.handleMouseMove);
-    if (this.options.refitOnResize) window.addEventListener('resize', this.handleWindowResize);
+    if (this.options.refitOnResize) window.addEventListener('resize', this.handleWindowResize, true);
   }
 
   private unbindHandlers(): void {
@@ -119,6 +127,7 @@ export class ZeroGInstance {
   private adjustIfOverflown(): void {
     if (this.element.clientHeight > this.parent.clientHeight) return this.fitPortrait();
     if (this.element.clientWidth > this.parent.clientWidth) return this.fitLandscape();
+    return undefined;
   }
 
   private swapMouseCursor(): void {
@@ -142,11 +151,19 @@ export class ZeroGInstance {
   private handleMouseDown = (e: MouseEvent): void => {
     this.mousedown = true;
     if (this.options.changeCursorOnPan) this.swapMouseCursor();
-    if (this.options.onPanStart) this.options.onPanStart({ lastX: null, lastY: null, x: e.pageX, y: e.pageY }, this);
+    if (this.options.onPanStart) {
+      this.options.onPanStart({
+        lastX: null, lastY: null, x: e.pageX, y: e.pageY,
+      }, this);
+    }
   }
 
   private handleMouseUp = (e: MouseEvent): void => {
-    if (this.options.onPanEnd) this.options.onPanEnd({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
+    if (this.options.onPanEnd) {
+      this.options.onPanEnd({
+        lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY,
+      }, this);
+    }
     this.clearLast();
     this.mousedown = false;
     if (this.options.changeCursorOnPan) this.swapMouseCursor();
@@ -154,7 +171,11 @@ export class ZeroGInstance {
 
   private handleMouseMove = (e: MouseEvent): void => {
     if (this.mousedown) {
-      if (this.options.onPanMove) this.options.onPanMove({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
+      if (this.options.onPanMove) {
+        this.options.onPanMove({
+          lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY,
+        }, this);
+      }
       if (!this.controlledByDockingProcedure) this.doPan(e.pageX, e.pageY);
     }
   }
@@ -231,7 +252,8 @@ export class ZeroGInstance {
   }
 
   public clearLast(): void {
-    this.lastX = this.lastY = null;
+    this.lastX = null;
+    this.lastY = null;
   }
 
   public getElement(): HTMLElement {

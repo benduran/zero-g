@@ -18,6 +18,8 @@
   "rules": {
     "import/extensions": ["off"],
     "import/no-unresolved": ["off"],
-    "@typescript-eslint/no-non-null-assertion": ["off"]
+    "@typescript-eslint/no-non-null-assertion": ["off"],
+    "max-len": ["error", 180],
+    "no-useless-return": ["off"]
   }
 }

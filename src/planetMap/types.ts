@@ -32,3 +32,10 @@ export interface Point {
 export interface FreeformAnnotation extends BaseAnnotation {
   points: Point[];
 }
+
+export enum AnnotationMode {
+  None,
+  Rectangle,
+  Ellipse,
+  Freeform,
+}
