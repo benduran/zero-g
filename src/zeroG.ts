@@ -7,44 +7,52 @@ enum Orientation {
   Square,
 }
 
-export interface IPannerOptions {
+export interface PannerOptions {
   changeCursorOnPan?: boolean;
   disabled?: boolean;
   refitOnResize?: boolean;
 
   onScaleChange?: (currentScale: number) => void;
-  onPanEnd?: (panEvent: IPanEvent, instance: ZeroGInstance) => void;
-  onPanMove?: (panEvent: IPanEvent, instance: ZeroGInstance) => void;
-  onPanStart?: (panEvent: IPanEvent, instance: ZeroGInstance) => void;
+  onPanEnd?: (panEvent: PanEvent, instance: ZeroGInstance) => void;
+  onPanMove?: (panEvent: PanEvent, instance: ZeroGInstance) => void;
+  onPanStart?: (panEvent: PanEvent, instance: ZeroGInstance) => void;
 }
 
-const defaultPannerOptions: IPannerOptions = {
+const defaultPannerOptions: PannerOptions = {
   changeCursorOnPan: true,
   disabled: false,
   refitOnResize: true,
 
   onScaleChange: (currentScale: number) => undefined,
-  onPanEnd: (panEvent: IPanEvent, instance: ZeroGInstance) => undefined,
-  onPanMove: (panEvent: IPanEvent, instance: ZeroGInstance) => undefined,
-  onPanStart: (panEvent: IPanEvent, instance: ZeroGInstance) => undefined,
+  onPanEnd: (panEvent: PanEvent, instance: ZeroGInstance) => undefined,
+  onPanMove: (panEvent: PanEvent, instance: ZeroGInstance) => undefined,
+  onPanStart: (panEvent: PanEvent, instance: ZeroGInstance) => undefined,
 };
 
 const allowedPannerOptionKeys = Object.keys(defaultPannerOptions);
 
 export class ZeroGInstance {
   private lastX: number | null = null;
+
   private lastY: number | null = null;
+
   private zoom: number | null = null;
+
   private mousedown: boolean = false;
+
   private hasLoadHandler: boolean = false;
+
   private windowResizeTimeout: any;
 
   private naturalHeight: number;
+
   private naturalWidth: number;
+
   private orientation: Orientation;
+
   private parent: HTMLElement;
 
-  constructor(private element: HTMLElement, private options: IPannerOptions = defaultPannerOptions, private controlledByDockingProcedure: boolean = false) {
+  constructor(private element: HTMLElement, private options: PannerOptions = defaultPannerOptions, private controlledByDockingProcedure: boolean = false) {
     this.options = { ...defaultPannerOptions, ...options };
     this.init();
   }
@@ -118,6 +126,7 @@ export class ZeroGInstance {
   private adjustIfOverflown() {
     if (this.element.clientHeight > this.parent.clientHeight) return this.fitPortrait();
     if (this.element.clientWidth > this.parent.clientWidth) return this.fitLandscape();
+    return undefined;
   }
 
   private swapMouseCursor() {
@@ -141,11 +150,19 @@ export class ZeroGInstance {
   private handleMouseDown = (e: MouseEvent) => {
     this.mousedown = true;
     if (this.options.changeCursorOnPan) this.swapMouseCursor();
-    if (this.options.onPanStart) this.options.onPanStart({ lastX: null, lastY: null, x: e.pageX, y: e.pageY }, this);
+    if (this.options.onPanStart) {
+      this.options.onPanStart({
+        lastX: null, lastY: null, x: e.pageX, y: e.pageY,
+      }, this);
+    }
   }
 
   private handleMouseUp = (e: MouseEvent) => {
-    if (this.options.onPanEnd) this.options.onPanEnd({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
+    if (this.options.onPanEnd) {
+      this.options.onPanEnd({
+        lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY,
+      }, this);
+    }
     this.clearLast();
     this.mousedown = false;
     if (this.options.changeCursorOnPan) this.swapMouseCursor();
@@ -153,7 +170,11 @@ export class ZeroGInstance {
 
   private handleMouseMove = (e: MouseEvent) => {
     if (this.mousedown) {
-      if (this.options.onPanMove) this.options.onPanMove({ lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY }, this);
+      if (this.options.onPanMove) {
+        this.options.onPanMove({
+          lastX: this.lastX, lastY: this.lastY, x: e.pageX, y: e.pageY,
+        }, this);
+      }
       if (!this.controlledByDockingProcedure) this.doPan(e.pageX, e.pageY);
     }
   }
@@ -197,11 +218,11 @@ export class ZeroGInstance {
     this.unbindHandlers();
   }
 
-  controlledPan(panEvent: IPanEvent) {
+  controlledPan(panEvent: PanEvent) {
     this.pan(panEvent.x, panEvent.y, panEvent.lastX, panEvent.lastY);
   }
 
-  set<K extends keyof IPannerOptions>(prop: K, val: IPannerOptions[K], reinit: boolean = false) {
+  set<K extends keyof PannerOptions>(prop: K, val: PannerOptions[K], reinit: boolean = false) {
     if (allowedPannerOptionKeys.indexOf(prop) > -1) {
       this.options[prop] = val;
       if (reinit) {
@@ -230,18 +251,19 @@ export class ZeroGInstance {
   }
 
   clearLast() {
-    this.lastX = this.lastY = null;
+    this.lastX = null;
+    this.lastY = null;
   }
 }
 
-export interface IPanEvent {
+export interface PanEvent {
   x: number;
   y: number;
   lastX: number | null;
   lastY: number | null;
 }
 
-export default function createZeroG(element: HTMLElement, options: IPannerOptions = defaultPannerOptions) {
+export default function createZeroG(element: HTMLElement, options: PannerOptions = defaultPannerOptions) {
   if (!element) throw new Error('Unable to initialize zero-g because no DOM element was provided');
   if (!element.parentElement) throw new Error('Unable to initialize zero-g because DOM element provided has no parent');
   const instance = new ZeroGInstance(element, options);

@@ -1,13 +1,14 @@
 
-import createZeroG, { ZeroGInstance, IPannerOptions, IPanEvent } from './zeroG';
+import createZeroG, { ZeroGInstance, PannerOptions, PanEvent } from './zeroG';
 
-export interface IDockingProcedureOptions extends Omit<IPannerOptions, 'onScaleChange'> {
+export interface DockingProcedureOptions extends Omit<PannerOptions, 'onScaleChange'> {
   onScaleChange?: (currentScale: number, sendingChildIndex: number) => void;
 }
 
 export class DockingProcedureInstance {
   private instances: ZeroGInstance[] = [];
-  constructor(private children: HTMLElement[], private options: IDockingProcedureOptions = {}) {
+
+  constructor(private children: HTMLElement[], private options: DockingProcedureOptions = {}) {
     this.init();
   }
 
@@ -27,7 +28,7 @@ export class DockingProcedureInstance {
   }
 
   private handlePanStart(childIndex: number) {
-    return (panEvent: IPanEvent, z: ZeroGInstance) => {
+    return (panEvent: PanEvent) => {
       this.instances.forEach((z, i) => {
         if (i !== childIndex) z.controlledPan(panEvent);
       });
@@ -35,7 +36,7 @@ export class DockingProcedureInstance {
   }
 
   private handlePanEnd(childIndex: number) {
-    return (panEvent: IPanEvent, z: ZeroGInstance) => {
+    return (panEvent: PanEvent) => {
       this.instances.forEach((z, i) => {
         if (i !== childIndex) z.controlledPan(panEvent);
       });
@@ -43,15 +44,15 @@ export class DockingProcedureInstance {
   }
 
   zoomInOut(zoomLevel: number) {
-    this.instances.forEach(z => z.zoomInOut(zoomLevel));
+    this.instances.forEach((z) => z.zoomInOut(zoomLevel));
   }
 
   zoomFit() {
-    this.instances.forEach(z => z.zoomFit());
+    this.instances.forEach((z) => z.zoomFit());
   }
 }
 
-export default function createDockingProcedure(children: HTMLElement[], options?: IDockingProcedureOptions) {
+export default function createDockingProcedure(children: HTMLElement[], options?: DockingProcedureOptions) {
   if (!children || !children.length) throw new Error('Unable to initialize dockingProcedure because children elements were provided');
   const dockingProcedureInstance = new DockingProcedureInstance(children, options);
   return dockingProcedureInstance;
