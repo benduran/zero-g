@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["dom", "es2017"],
+    "target": "ES6",
+    "module": "ESNEXT",
+    "lib": ["DOM", "ESNext"],
     "declaration": true,
-    "sourceMap": false,
     "outDir": "./dist",
     "removeComments": true,
-
+    "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
