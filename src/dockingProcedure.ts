@@ -1,23 +1,26 @@
+import createZeroG, { ZeroGInstance, PannerOptions, PanEvent } from './zeroG';
 
-import createZeroG, { ZeroGInstance, IPannerOptions, IPanEvent } from './zeroG';
-
-export interface IDockingProcedureOptions extends Omit<IPannerOptions, 'onScaleChange'> {
+export interface DockingProcedureOptions extends Omit<PannerOptions, 'onScaleChange'> {
   onScaleChange?: (currentScale: number, sendingChildIndex: number) => void;
 }
 
 export class DockingProcedureInstance {
   private instances: ZeroGInstance[] = [];
-  constructor(private children: HTMLElement[], private options: IDockingProcedureOptions = {}) {
+
+  constructor(private children: HTMLElement[], private options: DockingProcedureOptions = {}) {
     this.init();
   }
 
   private init() {
-    this.instances = Array.from(this.children).map((c, i) => createZeroG(c as HTMLElement, {
-      ...this.options,
-      onPanStart: this.handlePanStart(i),
-      onPanMove: this.handlePanEnd(i),
-      onScaleChange: this.handleScaleChange(i),
-    }));
+    this.instances = Array.from(this.children).map((c, i) => {
+      const z = createZeroG(c as HTMLElement, {
+        ...this.options,
+      });
+      z.onPanStart(this.handlePanStart(i));
+      z.onPanMove(this.handlePanEnd(i));
+      z.onScaleChange(this.handleScaleChange(i));
+      return z;
+    });
   }
 
   private handleScaleChange(childIndex: number) {
@@ -27,7 +30,7 @@ export class DockingProcedureInstance {
   }
 
   private handlePanStart(childIndex: number) {
-    return (panEvent: IPanEvent, z: ZeroGInstance) => {
+    return (panEvent: PanEvent) => {
       this.instances.forEach((z, i) => {
         if (i !== childIndex) z.controlledPan(panEvent);
       });
@@ -35,7 +38,7 @@ export class DockingProcedureInstance {
   }
 
   private handlePanEnd(childIndex: number) {
-    return (panEvent: IPanEvent, z: ZeroGInstance) => {
+    return (panEvent: PanEvent) => {
       this.instances.forEach((z, i) => {
         if (i !== childIndex) z.controlledPan(panEvent);
       });
@@ -51,8 +54,7 @@ export class DockingProcedureInstance {
   }
 }
 
-export default function createDockingProcedure(children: HTMLElement[], options?: IDockingProcedureOptions) {
+export default function createDockingProcedure(children: HTMLElement[], options?: DockingProcedureOptions) {
   if (!children || !children.length) throw new Error('Unable to initialize dockingProcedure because children elements were provided');
-  const dockingProcedureInstance = new DockingProcedureInstance(children, options);
-  return dockingProcedureInstance;
+  return new DockingProcedureInstance(children, options);
 }

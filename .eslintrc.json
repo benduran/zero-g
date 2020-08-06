@@ -15,8 +15,12 @@
     "plugins": [
         "@typescript-eslint"
     ],
-    "rules": {
+    "rules": {"arrow-parens": ["error", "as-needed", { "requireForBlockBody": true }],
       "max-len": ["error", 150],
-      "no-restricted-syntax": ["off"]
+      "no-unused-vars": ["off"],
+      "import/no-unresolved": ["off"],
+      "import/extensions": ["off"],
+      "no-restricted-syntax": ["off"],
+      "no-loop-func": ["off"]
     }
 }
