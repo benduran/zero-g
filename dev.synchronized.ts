@@ -1,6 +1,4 @@
-
-import { createDockingProcedure } from './src';
-import { DockingProcedureInstance } from './src/dockingProcedure';
+import { createDockingProcedure, DockingProcedureInstance } from './src/dockingProcedure';
 
 const elem = document.getElementById('outer');
 
@@ -28,11 +26,11 @@ const dockingProcedure = createDockingProcedure(Array.from(elem.querySelectorAll
 });
 
 zoomInBtn.addEventListener('click', () => {
-  window.ZOOM_LEVEL = window.ZOOM_LEVEL + window.ZOOM_STEP;
+  window.ZOOM_LEVEL += window.ZOOM_STEP;
   dockingProcedure.zoomInOut(window.ZOOM_LEVEL);
 });
 zoomOutBtn.addEventListener('click', () => {
-  window.ZOOM_LEVEL = window.ZOOM_LEVEL - window.ZOOM_STEP;
+  window.ZOOM_LEVEL -= window.ZOOM_STEP;
   dockingProcedure.zoomInOut(window.ZOOM_LEVEL);
 });
 currentScaleBtn.addEventListener('click', () => {

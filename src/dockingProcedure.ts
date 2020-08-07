@@ -1,4 +1,4 @@
-import createZeroG, { ZeroGInstance, PannerOptions, PanEvent } from './zeroG';
+import { createZeroG, ZeroGInstance, PannerOptions, PanEvent } from './zeroG';
 
 export interface DockingProcedureOptions extends Omit<PannerOptions, 'onScaleChange'> {
   onScaleChange?: (currentScale: number, sendingChildIndex: number) => void;
@@ -54,7 +54,7 @@ export class DockingProcedureInstance {
   }
 }
 
-export default function createDockingProcedure(children: HTMLElement[], options?: DockingProcedureOptions) {
+export function createDockingProcedure(children: HTMLElement[], options?: DockingProcedureOptions) {
   if (!children || !children.length) throw new Error('Unable to initialize dockingProcedure because children elements were provided');
   return new DockingProcedureInstance(children, options);
 }

@@ -1,4 +1,5 @@
 import { createZeroG, ZeroGInstance } from './src/zeroG';
+import createLaserPointer, { LaserPointerInstance } from './src/laserPointer';
 
 const elem = document.getElementById('dev');
 
@@ -6,6 +7,7 @@ if (!elem) throw new Error('Cannot run dev page because DOM element root was mis
 
 declare global {
   interface Window {
+    laserPointerInstance: LaserPointerInstance;
     pannerInstance: ZeroGInstance;
     ZOOM_LEVEL: number;
     ZOOM_STEP: number;
@@ -23,6 +25,7 @@ pannerInstance.onScaleChange((scale) => {
   currentScaleBtn.innerHTML = `${(scale * 100).toFixed(0)}%`;
   window.ZOOM_LEVEL = scale;
 });
+const laserPointerInstance = createLaserPointer(pannerInstance);
 
 zoomInBtn.addEventListener('click', () => {
   window.ZOOM_LEVEL += window.ZOOM_STEP;
@@ -37,3 +40,4 @@ currentScaleBtn.addEventListener('click', () => {
 });
 
 window.pannerInstance = pannerInstance;
+window.laserPointerInstance = laserPointerInstance;

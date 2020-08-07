@@ -12,9 +12,9 @@ export interface PannerOptions {
   refitOnResize?: boolean;
 }
 
-type OnScaleChangeCallback = (currentScale: number) => void;
-type PanCallback = (panEvent: PanEvent, instance: ZeroGInstance) => void;
-type OnSizeChangeCallback = (width: number, height: number) => void;
+export type OnScaleChangeCallback = (currentScale: number) => void;
+export type PanCallback = (panEvent: PanEvent, instance: ZeroGInstance) => void;
+export type OnSizeChangeCallback = (width: number, height: number) => void;
 
 const defaultPannerOptions: PannerOptions = {
   changeCursorOnPan: true,
@@ -53,10 +53,10 @@ export class ZeroGInstance {
 
   private onSizeChangeCallbacks: OnSizeChangeCallback[] = [];
 
-  public parent: HTMLElement;
+  private parent: HTMLElement;
 
   constructor(
-    private element: HTMLElement,
+    public readonly element: HTMLElement,
     private options: PannerOptions = defaultPannerOptions,
     private controlledByDockingProcedure: boolean = false,
   ) {
@@ -155,11 +155,13 @@ export class ZeroGInstance {
   }
 
   private handleMouseDown = (e: MouseEvent) => {
-    this.mousedown = true;
-    if (this.options.changeCursorOnPan) this.swapMouseCursor();
-    this.onPanStartCallbacks.forEach(cb => cb({
-      lastX: null, lastY: null, x: e.pageX, y: e.pageY,
-    }, this));
+    if (e.button === 0) {
+      this.mousedown = true;
+      if (this.options.changeCursorOnPan) this.swapMouseCursor();
+      this.onPanStartCallbacks.forEach(cb => cb({
+        lastX: null, lastY: null, x: e.pageX, y: e.pageY,
+      }, this));
+    }
   }
 
   private handleMouseUp = (e: MouseEvent) => {
@@ -287,7 +289,7 @@ export interface PanEvent {
   lastY: number | null;
 }
 
-export default function createZeroG(element: HTMLElement, options: PannerOptions = defaultPannerOptions) {
+export function createZeroG(element: HTMLElement, options: PannerOptions = defaultPannerOptions) {
   if (!element) throw new Error('Unable to initialize zero-g because no DOM element was provided');
   if (!element.parentElement) throw new Error('Unable to initialize zero-g because DOM element provided has no parent');
   const instance = new ZeroGInstance(element, options);
