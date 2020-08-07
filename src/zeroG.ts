@@ -12,9 +12,9 @@ export interface PannerOptions {
   refitOnResize?: boolean;
 }
 
-export type OnScaleChangeCallback = (currentScale: number) => void;
+export type OnScaleChangeCallback = (currentScale: number, instance: ZeroGInstance) => void;
 export type PanCallback = (panEvent: PanEvent, instance: ZeroGInstance) => void;
-export type OnSizeChangeCallback = (width: number, height: number) => void;
+export type OnSizeChangeCallback = (width: number, height: number, instance: ZeroGInstance) => void;
 
 const defaultPannerOptions: PannerOptions = {
   changeCursorOnPan: true,
@@ -208,8 +208,8 @@ export class ZeroGInstance {
     }
     this.adjustIfOverflown();
     const { clientHeight, clientWidth } = this.element;
-    this.onSizeChangeCallbacks.forEach(cb => cb(clientWidth, clientHeight));
-    this.onScaleChangeCallbacks.forEach(cb => cb(this.currentScale));
+    this.onSizeChangeCallbacks.forEach(cb => cb(clientWidth, clientHeight, this));
+    this.onScaleChangeCallbacks.forEach(cb => cb(this.currentScale, this));
   }
 
   private queueInitialFit() {
@@ -230,6 +230,7 @@ export class ZeroGInstance {
 
   public controlledPan(panEvent: PanEvent) {
     this.pan(panEvent.x, panEvent.y, panEvent.lastX, panEvent.lastY);
+    this.onPanMoveCallbacks.forEach(cb => cb(panEvent, this));
   }
 
   public set<K extends keyof PannerOptions>(prop: K, val: PannerOptions[K], reinit: boolean = false) {
