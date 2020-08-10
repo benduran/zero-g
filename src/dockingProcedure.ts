@@ -1,4 +1,6 @@
-import { createZeroG, ZeroGInstance, PannerOptions, PanEvent } from './zeroG';
+import {
+  createZeroG, ZeroGInstance, PannerOptions, PanEvent,
+} from './zeroG';
 
 export interface DockingProcedureOptions extends Omit<PannerOptions, 'onScaleChange'> {
   onScaleChange?: (currentScale: number, sendingChildIndex: number) => void;

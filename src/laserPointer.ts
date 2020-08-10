@@ -88,6 +88,7 @@ export class LaserPointerInstance {
   private doDrawOrPan(pageX: number, pageY: number) {
     const deltaX = this.lastX !== null ? pageX - this.lastX : 0;
     const deltaY = this.lastY !== null ? pageY - this.lastY : 0;
+    console.info('deltaX', deltaX, 'deltaY', deltaY);
     this.zeroG.controlledPan({
       x: pageX, y: pageY, lastX: this.lastX, lastY: this.lastY,
     });

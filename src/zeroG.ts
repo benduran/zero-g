@@ -254,8 +254,8 @@ export class ZeroGInstance {
     const newWidth = this.naturalWidth * this.zoom;
     this.element.style.height = toPx(newHeight);
     this.element.style.width = toPx(newWidth);
-    this.onSizeChangeCallbacks.forEach((cb => cb(newWidth, newHeight)));
-    this.onScaleChangeCallbacks.forEach(cb => cb(this.currentScale));
+    this.onSizeChangeCallbacks.forEach((cb => cb(newWidth, newHeight, this)));
+    this.onScaleChangeCallbacks.forEach(cb => cb(this.currentScale, this));
   }
 
   public pan(x: number, y: number, lastX: number | null, lastY: number | null) {
