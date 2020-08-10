@@ -1,5 +1,5 @@
 import { createZeroG, ZeroGInstance } from './src/zeroG';
-import createLaserPointer, { LaserPointerInstance } from './src/laserPointer';
+import createLaserPointer, { LaserPointerInstance, LaserPointerMode } from './src/laserPointer';
 
 const elem = document.getElementById('dev');
 
@@ -38,6 +38,8 @@ zoomOutBtn.addEventListener('click', () => {
 currentScaleBtn.addEventListener('click', () => {
   pannerInstance.zoomFit();
 });
+
+laserPointerInstance.set('mode', LaserPointerMode.Draw);
 
 window.pannerInstance = pannerInstance;
 window.laserPointerInstance = laserPointerInstance;

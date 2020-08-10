@@ -13,9 +13,11 @@ export interface LaserPointerOptions {
   mode?: LaserPointerMode;
 }
 
-export class LaserPointerInstance {
-  static DEFAULT_COLOR = '#0000ff';
+const DEFAULT_COLOR = '#0000ff';
+const LATEST_ID = '___laserpointer__latest___';
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
+export class LaserPointerInstance {
   private svg: SVGSVGElement | null = null;
 
   private mousedown = false;
@@ -28,7 +30,7 @@ export class LaserPointerInstance {
 
   constructor(private zeroG: ZeroGInstance, options?: LaserPointerOptions) {
     this.options = {
-      color: LaserPointerInstance.DEFAULT_COLOR,
+      color: DEFAULT_COLOR,
       mode: LaserPointerMode.Pan,
       ...options,
     };
@@ -37,12 +39,13 @@ export class LaserPointerInstance {
 
   private init() {
     this.injectSVG();
+    this.injectLatest();
     this.bindHandlers();
   }
 
   private injectSVG() {
     if (this.svg) throw new Error('Unable to injectSVG. SVG already exists');
-    this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    this.svg = document.createElementNS(SVG_NS, 'svg');
     this.zeroG.element.parentElement?.appendChild(this.svg);
     this.svg.style.position = 'absolute';
     this.svg.style.willChange = 'top, left, width, height';
@@ -54,6 +57,39 @@ export class LaserPointerInstance {
 
   private removeSVG() {
     if (this.svg) this.svg.remove();
+  }
+
+  private getLatest(): SVGPathElement | SVGRectElement | null {
+    return this.svg?.querySelector(`#${LATEST_ID}`) ?? null;
+  }
+
+  /**
+   * Injects the latest <rect />, <ellipse /> or <g /> for handling the drawing
+   * @private
+   */
+  private injectLatest() {
+    if (this.svg) {
+      let l = this.getLatest();
+      if (l) l.remove();
+      switch (this.options.mode) {
+        case LaserPointerMode.Draw:
+          l = document.createElementNS(SVG_NS, 'g') as SVGPathElement;
+          break;
+        case LaserPointerMode.Ellipse:
+          l = document.createElementNS(SVG_NS, 'rect'); // use rect while drawing
+          break;
+        case LaserPointerMode.Rectangle:
+          l = document.createElementNS(SVG_NS, 'rect');
+          break;
+        default:
+          break;
+      }
+      if (l) {
+        l.setAttribute('stroke-color', this.options.color ?? '');
+        l.setAttribute('id', LATEST_ID);
+        this.svg.appendChild(l);
+      }
+    }
   }
 
   private bindHandlers() {
@@ -88,10 +124,20 @@ export class LaserPointerInstance {
   private doDrawOrPan(pageX: number, pageY: number) {
     const deltaX = this.lastX !== null ? pageX - this.lastX : 0;
     const deltaY = this.lastY !== null ? pageY - this.lastY : 0;
+    switch (this.options.mode) {
+      case LaserPointerMode.Draw:
+        break;
+      case LaserPointerMode.Ellipse:
+        break;
+      case LaserPointerMode.Rectangle:
+        break;
+      default:
+        this.zeroG.controlledPan({
+          x: pageX, y: pageY, lastX: this.lastX, lastY: this.lastY,
+        });
+        break;
+    }
     console.info('deltaX', deltaX, 'deltaY', deltaY);
-    this.zeroG.controlledPan({
-      x: pageX, y: pageY, lastX: this.lastX, lastY: this.lastY,
-    });
     this.lastX = pageX;
     this.lastY = pageY;
   }
@@ -124,6 +170,7 @@ export class LaserPointerInstance {
       this.svg.style.height = typeof height === 'string' ? height : toPx(height);
       this.svg.style.top = instance.element.style.top;
       this.svg.style.left = instance.element.style.left;
+      this.svg.setAttribute('viewbox', `0 0 ${this.svg.clientWidth} ${this.svg.clientHeight}`);
     }
   }
 
@@ -139,6 +186,7 @@ export class LaserPointerInstance {
       ...this.options,
       [prop]: val,
     };
+    this.injectLatest();
   }
 
   public destroy() {
