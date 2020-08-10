@@ -2,17 +2,53 @@ import { toPx } from './util';
 import { PanCallback, ZeroGInstance } from './zeroG';
 
 export enum LaserPointerMode {
-  Pan,
-  Rectangle,
-  Ellipse,
-  Draw,
+  Pan= 'PAN',
+  Rectangle = 'RECTANGLE',
+  Ellipse = 'ELLIPSE',
+  Draw = 'DRAW',
+}
+
+export enum LaserPointerDrawingType {
+  RECTANGLE = 'RECTANGLE',
+  ELLIPSE = 'ELLIPSE',
+  DRAWING = 'DRAWING',
+}
+
+export interface LaserPointerPoint {
+  x: number;
+  y: number;
+}
+
+interface LaserPointerBox extends LaserPointerPoint {
+  height: number;
+  width: number;
+}
+
+interface LaserPointerDrawingBase {
+  type: LaserPointerDrawingType;
+}
+
+export interface LaserPointerRectangle extends LaserPointerBox, LaserPointerDrawingBase {
+  type: LaserPointerDrawingType.RECTANGLE;
+}
+
+export interface LaserPointerEllipse extends LaserPointerBox, LaserPointerDrawingBase {
+  type: LaserPointerDrawingType.ELLIPSE;
+}
+
+export interface LaserPointerDrawing extends LaserPointerDrawingBase {
+  points: LaserPointerPoint[];
+  type: LaserPointerDrawingType.DRAWING;
 }
 
 export interface LaserPointerOptions {
   color?: string;
   mode?: LaserPointerMode;
+  simplifyDrawingPoints?: (points: LaserPointerPoint[]) => LaserPointerPoint[];
   strokeWidth?: number;
 }
+
+export type OnCreateShapeCallback = (drawing: LaserPointerRectangle | LaserPointerEllipse | LaserPointerDrawing) => void;
 
 const DEFAULT_COLOR = '#ff0000';
 const DEFAULT_STROKE_WIDTH = 4;
@@ -36,7 +72,11 @@ export class LaserPointerInstance {
 
   private lastY: number | null = null;
 
+  private drawingPoints: LaserPointerPoint[] = [];
+
   private options: LaserPointerOptions;
+
+  private onCreateShapeCallbacks: OnCreateShapeCallback[] = [];
 
   constructor(private zeroG: ZeroGInstance, options?: LaserPointerOptions) {
     this.options = {
@@ -117,7 +157,6 @@ export class LaserPointerInstance {
 
   private bindHandlers() {
     this.zeroG.onSizeChange(this.handleSizeChange);
-    this.zeroG.onPanMove(this.handlePanMove);
 
     if (this.svg) {
       this.svg.addEventListener('mousedown', this.handleMousedown);
@@ -152,6 +191,7 @@ export class LaserPointerInstance {
         const path = this.getLatest();
         if (path) {
           const coords = this.mousePosToSvgPos(pageX, pageY);
+          this.drawingPoints.push(coords);
           path.setAttribute('d', `${path.getAttribute('d')} L${coords.x} ${coords.y}`);
         }
         break;
@@ -198,7 +238,24 @@ export class LaserPointerInstance {
     if (this.mousedown) this.doDrawOrPan(e.pageX, e.pageY);
   }
 
-  private handleMouseup = (e: MouseEvent) => {
+  private handleMouseup = () => {
+    const l = this.getLatest();
+    if (l) {
+      switch (this.options.mode) {
+        case LaserPointerMode.Draw: {
+          const d: LaserPointerDrawing = {
+            points: typeof this.options.simplifyDrawingPoints === 'function'
+              ? this.options.simplifyDrawingPoints(this.drawingPoints)
+              : this.drawingPoints,
+            type: LaserPointerDrawingType.DRAWING,
+          };
+          this.onCreateShapeCallbacks.forEach(cb => cb(d));
+          break;
+        }
+        default:
+          break;
+      }
+    }
     this.clearLast();
     this.mousedown = false;
     this.swapMouseCursor();

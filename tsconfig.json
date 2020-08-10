@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     /* Basic Options */
+    "moduleResolution": "Node",
     "target": "ES6",
     "module": "ESNEXT",
     "lib": ["DOM", "ESNext"],
@@ -25,9 +26,6 @@
     "esModuleInterop": true,
     "baseUrl": "./"
   },
-  "exclude": [
-    "./node_modules"
-  ],
   "include": [
     "./src",
     "dev.ts",
