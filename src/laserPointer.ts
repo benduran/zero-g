@@ -1,8 +1,16 @@
 import { PanCallback, ZeroGInstance } from './zeroG';
 import { toPx } from './util';
 
+export enum LaserPointerMode {
+  Pan,
+  Rectangle,
+  Ellipse,
+  Draw,
+}
+
 export interface LaserPointerOptions {
   color?: string;
+  mode?: LaserPointerMode;
 }
 
 export class LaserPointerInstance {
@@ -21,6 +29,7 @@ export class LaserPointerInstance {
   constructor(private zeroG: ZeroGInstance, options?: LaserPointerOptions) {
     this.options = {
       color: LaserPointerInstance.DEFAULT_COLOR,
+      mode: LaserPointerMode.Pan,
       ...options,
     };
     this.init();
@@ -68,8 +77,11 @@ export class LaserPointerInstance {
 
   private swapMouseCursor() {
     if (this.svg) {
-      if (this.mousedown) this.svg.style.cursor = 'crosshair';
-      else this.svg.style.cursor = 'default';
+      if (this.mousedown) {
+        if (this.options.mode === LaserPointerMode.Pan) this.svg.style.cursor = 'grabbing';
+        else this.svg.style.cursor = 'crosshair';
+      } else if (this.options.mode !== LaserPointerMode.Pan) this.svg.style.cursor = 'crosshair';
+      else this.svg.style.cursor = 'grab';
     }
   }
 
@@ -91,17 +103,18 @@ export class LaserPointerInstance {
   private handleMousedown = (e: MouseEvent) => {
     if (e.button === 0) {
       this.mousedown = true;
-      this.swapMouseCursor();
     }
   }
 
   private handleMousemove = (e: MouseEvent) => {
+    this.swapMouseCursor();
     if (this.mousedown) this.doDrawOrPan(e.pageX, e.pageY);
   }
 
   private handleMouseup = (e: MouseEvent) => {
     this.clearLast();
     this.mousedown = false;
+    this.swapMouseCursor();
   }
 
   private handleSizeChange = (width: number | string, height: number | string, instance: ZeroGInstance) => {
@@ -120,7 +133,12 @@ export class LaserPointerInstance {
     }
   }
 
-  // private handle
+  public set<K extends keyof LaserPointerOptions>(prop: K, val: LaserPointerOptions[K]) {
+    this.options = {
+      ...this.options,
+      [prop]: val,
+    };
+  }
 
   public destroy() {
     this.unbindHandlers();
