@@ -53,7 +53,7 @@ export class LaserPointerInstance {
     if (this.svg) {
       const box = this.svg.getBoundingClientRect();
       out.x = pageX - box.left;
-      out.y = pageX - box.top;
+      out.y = pageY - box.top;
     }
     return out;
   }
@@ -183,7 +183,8 @@ export class LaserPointerInstance {
           // need to move the <g />
           const p = this.getLatest();
           if (!p) throw new Error('Unable to set intial <g /> move because <g /> is missing');
-          p.setAttribute('d', `M${e.pageX} ${e.pageY}`);
+          const rel = this.mousePosToSvgPos(e.pageX, e.pageY);
+          p.setAttribute('d', `M${rel.x} ${rel.y}`);
           break;
         }
         default:
