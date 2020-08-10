@@ -1,5 +1,4 @@
 import { PanCallback, ZeroGInstance } from './zeroG';
-import { toPx } from './util';
 
 export enum LaserPointerMode {
   Pan,
@@ -11,9 +10,11 @@ export enum LaserPointerMode {
 export interface LaserPointerOptions {
   color?: string;
   mode?: LaserPointerMode;
+  strokeWidth?: number;
 }
 
-const DEFAULT_COLOR = '#0000ff';
+const DEFAULT_COLOR = '#ff0000';
+const DEFAULT_STROKE_WIDTH = 4;
 const LATEST_ID = '___laserpointer__latest___';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -32,6 +33,7 @@ export class LaserPointerInstance {
     this.options = {
       color: DEFAULT_COLOR,
       mode: LaserPointerMode.Pan,
+      strokeWidth: DEFAULT_STROKE_WIDTH,
       ...options,
     };
     this.init();
@@ -73,7 +75,7 @@ export class LaserPointerInstance {
       if (l) l.remove();
       switch (this.options.mode) {
         case LaserPointerMode.Draw:
-          l = document.createElementNS(SVG_NS, 'g') as SVGPathElement;
+          l = document.createElementNS(SVG_NS, 'path');
           break;
         case LaserPointerMode.Ellipse:
           l = document.createElementNS(SVG_NS, 'rect'); // use rect while drawing
@@ -85,7 +87,8 @@ export class LaserPointerInstance {
           break;
       }
       if (l) {
-        l.setAttribute('stroke-color', this.options.color ?? '');
+        l.setAttribute('stroke', this.options.color ?? DEFAULT_COLOR);
+        l.setAttribute('stroke-width', (this.options.strokeWidth ?? DEFAULT_STROKE_WIDTH).toString());
         l.setAttribute('id', LATEST_ID);
         this.svg.appendChild(l);
       }
@@ -150,6 +153,17 @@ export class LaserPointerInstance {
   private handleMousedown = (e: MouseEvent) => {
     if (e.button === 0) {
       this.mousedown = true;
+      switch (this.options.mode) {
+        case LaserPointerMode.Draw: {
+          // need to move the <g />
+          const p = this.getLatest();
+          if (!p) throw new Error('Unable to set intial <g /> move because <g /> is missing');
+          p.setAttribute('d', `M${e.pageX} ${e.pageY}`);
+          break;
+        }
+        default:
+          break;
+      }
     }
   }
 
@@ -164,13 +178,14 @@ export class LaserPointerInstance {
     this.swapMouseCursor();
   }
 
-  private handleSizeChange = (width: number | string, height: number | string, instance: ZeroGInstance) => {
+  private handleSizeChange = (width: number, height: number, instance: ZeroGInstance) => {
     if (this.svg) {
-      this.svg.style.width = typeof width === 'string' ? width : toPx(width);
-      this.svg.style.height = typeof height === 'string' ? height : toPx(height);
+      this.svg.setAttribute('width', width.toString());
+      this.svg.setAttribute('height', height.toString());
+      const { clientHeight, clientWidth } = this.svg;
       this.svg.style.top = instance.element.style.top;
       this.svg.style.left = instance.element.style.left;
-      this.svg.setAttribute('viewbox', `0 0 ${this.svg.clientWidth} ${this.svg.clientHeight}`);
+      this.svg.setAttribute('viewbox', `0 0 ${clientWidth} ${clientHeight}`);
     }
   }
 
