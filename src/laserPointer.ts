@@ -1,3 +1,4 @@
+import { toPx } from './util';
 import { PanCallback, ZeroGInstance } from './zeroG';
 
 export enum LaserPointerMode {
@@ -19,6 +20,14 @@ const LATEST_ID = '___laserpointer__latest___';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export class LaserPointerInstance {
+  private svgHeight = 0;
+
+  private svgWidth = 0;
+
+  private svgTop = 0;
+
+  private svgLeft = 0;
+
   private svg: SVGSVGElement | null = null;
 
   private mousedown = false;
@@ -37,6 +46,16 @@ export class LaserPointerInstance {
       ...options,
     };
     this.init();
+  }
+
+  private mousePosToSvgPos(pageX: number, pageY: number) {
+    const out = { x: 0, y: 0 };
+    if (this.svg) {
+      const box = this.svg.getBoundingClientRect();
+      out.x = pageX - box.left;
+      out.y = pageX - box.top;
+    }
+    return out;
   }
 
   private init() {
@@ -87,6 +106,7 @@ export class LaserPointerInstance {
           break;
       }
       if (l) {
+        l.setAttribute('fill', 'none');
         l.setAttribute('stroke', this.options.color ?? DEFAULT_COLOR);
         l.setAttribute('stroke-width', (this.options.strokeWidth ?? DEFAULT_STROKE_WIDTH).toString());
         l.setAttribute('id', LATEST_ID);
@@ -125,11 +145,17 @@ export class LaserPointerInstance {
   }
 
   private doDrawOrPan(pageX: number, pageY: number) {
-    const deltaX = this.lastX !== null ? pageX - this.lastX : 0;
-    const deltaY = this.lastY !== null ? pageY - this.lastY : 0;
+    // const deltaX = this.lastX !== null ? pageX - this.lastX : 0;
+    // const deltaY = this.lastY !== null ? pageY - this.lastY : 0;
     switch (this.options.mode) {
-      case LaserPointerMode.Draw:
+      case LaserPointerMode.Draw: {
+        const path = this.getLatest();
+        if (path) {
+          const coords = this.mousePosToSvgPos(pageX, pageY);
+          path.setAttribute('d', `${path.getAttribute('d')} L${coords.x} ${coords.y}`);
+        }
         break;
+      }
       case LaserPointerMode.Ellipse:
         break;
       case LaserPointerMode.Rectangle:
@@ -140,7 +166,6 @@ export class LaserPointerInstance {
         });
         break;
     }
-    console.info('deltaX', deltaX, 'deltaY', deltaY);
     this.lastX = pageX;
     this.lastY = pageY;
   }
@@ -183,16 +208,21 @@ export class LaserPointerInstance {
       this.svg.setAttribute('width', width.toString());
       this.svg.setAttribute('height', height.toString());
       const { clientHeight, clientWidth } = this.svg;
+      this.svgHeight = clientHeight;
+      this.svgWidth = clientWidth;
       this.svg.style.top = instance.element.style.top;
       this.svg.style.left = instance.element.style.left;
-      this.svg.setAttribute('viewbox', `0 0 ${clientWidth} ${clientHeight}`);
+      this.svg.setAttribute('viewbox', `0 0 ${this.svgWidth} ${this.svgHeight}`);
     }
   }
 
   private handlePanMove: PanCallback = (_, instance) => {
     if (this.svg) {
-      this.svg.style.top = instance.element.style.top;
-      this.svg.style.left = instance.element.style.left;
+      const { element: { offsetTop, offsetLeft } } = instance;
+      this.svgTop = offsetTop;
+      this.svgLeft = offsetLeft;
+      this.svg.style.top = toPx(this.svgTop);
+      this.svg.style.left = toPx(this.svgLeft);
     }
   }
 
