@@ -48,7 +48,9 @@ export interface LaserPointerOptions {
   strokeWidth?: number;
 }
 
-export type OnCreateShapeCallback = (drawing: LaserPointerRectangle | LaserPointerEllipse | LaserPointerDrawing) => void;
+type Shape = LaserPointerRectangle | LaserPointerEllipse | LaserPointerDrawing;
+
+export type OnCreateShapeCallback = (drawing: Shape) => void;
 
 const DEFAULT_COLOR = '#ff0000';
 const DEFAULT_STROKE_WIDTH = 4;
@@ -72,11 +74,13 @@ export class LaserPointerInstance {
 
   private lastY: number | null = null;
 
-  private drawingPoints: LaserPointerPoint[] = [];
+  private latestDrawingPoints: LaserPointerPoint[] = [];
 
   private options: LaserPointerOptions;
 
   private onCreateShapeCallbacks: OnCreateShapeCallback[] = [];
+
+  private shapesToDraw: Shape[] = [];
 
   constructor(private zeroG: ZeroGInstance, options?: LaserPointerOptions) {
     this.options = {
@@ -155,6 +159,41 @@ export class LaserPointerInstance {
     }
   }
 
+  private clearShapes() {
+    const latest = this.getLatest();
+    if (this.svg && latest) {
+      for (const c of Array.from(this.svg.children)) {
+        if (c !== latest) c.remove();
+      }
+    }
+  }
+
+  private drawShapes() {
+    this.shapesToDraw.forEach((s) => {
+      switch (s.type) {
+        case LaserPointerDrawingType.DRAWING: {
+          if (s.points.length > 0) {
+            const path = document.createElementNS(SVG_NS, 'path');
+            const firstPoint = s.points[0];
+            const d = `M${firstPoint.x} ${firstPoint.y} ${s.points.slice(1).map(p => `L${p.x} ${p.y}`)}`;
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', this.options.color ?? DEFAULT_COLOR);
+            path.setAttribute('stroke-width', (this.options.strokeWidth ?? DEFAULT_STROKE_WIDTH).toString());
+            path.setAttribute('fill', 'none');
+            this.svg?.appendChild(path);
+          }
+          break;
+        }
+        case LaserPointerDrawingType.ELLIPSE:
+          break;
+        case LaserPointerDrawingType.RECTANGLE:
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
   private bindHandlers() {
     this.zeroG.onSizeChange(this.handleSizeChange);
 
@@ -171,6 +210,7 @@ export class LaserPointerInstance {
       this.svg.removeEventListener('mousemove', this.handleMousemove);
       this.svg.removeEventListener('mouseup', this.handleMouseup);
     }
+    this.onCreateShapeCallbacks = [];
   }
 
   private swapMouseCursor() {
@@ -191,7 +231,7 @@ export class LaserPointerInstance {
         const path = this.getLatest();
         if (path) {
           const coords = this.mousePosToSvgPos(pageX, pageY);
-          this.drawingPoints.push(coords);
+          this.latestDrawingPoints.push(coords);
           path.setAttribute('d', `${path.getAttribute('d')} L${coords.x} ${coords.y}`);
         }
         break;
@@ -210,6 +250,11 @@ export class LaserPointerInstance {
     this.lastY = pageY;
   }
 
+  private clearLatest() {
+    const latest = this.getLatest();
+    latest?.remove();
+  }
+
   private clearLast() {
     this.lastX = null;
     this.lastY = null;
@@ -220,9 +265,9 @@ export class LaserPointerInstance {
       this.mousedown = true;
       switch (this.options.mode) {
         case LaserPointerMode.Draw: {
-          // need to move the <g />
+          this.injectLatest();
           const p = this.getLatest();
-          if (!p) throw new Error('Unable to set intial <g /> move because <g /> is missing');
+          if (!p) throw new Error('Unable to set initial "d" move because <path /> is missing');
           const rel = this.mousePosToSvgPos(e.pageX, e.pageY);
           p.setAttribute('d', `M${rel.x} ${rel.y}`);
           break;
@@ -245,8 +290,8 @@ export class LaserPointerInstance {
         case LaserPointerMode.Draw: {
           const d: LaserPointerDrawing = {
             points: typeof this.options.simplifyDrawingPoints === 'function'
-              ? this.options.simplifyDrawingPoints(this.drawingPoints)
-              : this.drawingPoints,
+              ? this.options.simplifyDrawingPoints(this.latestDrawingPoints)
+              : this.latestDrawingPoints,
             type: LaserPointerDrawingType.DRAWING,
           };
           this.onCreateShapeCallbacks.forEach(cb => cb(d));
@@ -256,9 +301,11 @@ export class LaserPointerInstance {
           break;
       }
     }
+    this.latestDrawingPoints = [];
     this.clearLast();
     this.mousedown = false;
     this.swapMouseCursor();
+    this.clearLatest();
   }
 
   private handleSizeChange = (width: number, height: number, instance: ZeroGInstance) => {
@@ -290,6 +337,16 @@ export class LaserPointerInstance {
       [prop]: val,
     };
     this.injectLatest();
+  }
+
+  public onCreateShape(cb: OnCreateShapeCallback) {
+    this.onCreateShapeCallbacks.push(cb);
+  }
+
+  public addDrawings(drawing: Shape[]) {
+    this.shapesToDraw = this.shapesToDraw.concat(drawing);
+    this.clearShapes();
+    this.drawShapes();
   }
 
   public destroy() {

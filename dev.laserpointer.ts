@@ -1,5 +1,10 @@
 import { createZeroG, ZeroGInstance } from './src/zeroG';
-import createLaserPointer, { LaserPointerInstance, LaserPointerMode } from './src/laserPointer';
+import createLaserPointer, {
+  LaserPointerDrawingType,
+  LaserPointerInstance,
+  LaserPointerMode,
+} from './src/laserPointer';
+import { simplifyPoints } from './src/simplifyPoints';
 
 const elem = document.getElementById('dev');
 
@@ -40,6 +45,12 @@ currentScaleBtn.addEventListener('click', () => {
 });
 
 laserPointerInstance.set('mode', LaserPointerMode.Draw);
+laserPointerInstance.onCreateShape((shape) => {
+  if (shape.type === LaserPointerDrawingType.DRAWING) {
+    const d = { ...shape, points: simplifyPoints(shape.points) };
+    laserPointerInstance.addDrawings([d]);
+  }
+});
 
 window.pannerInstance = pannerInstance;
 window.laserPointerInstance = laserPointerInstance;
