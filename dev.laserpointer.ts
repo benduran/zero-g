@@ -43,7 +43,7 @@ currentScaleBtn.addEventListener('click', () => {
   pannerInstance.zoomFit();
 });
 
-laserPointerInstance.set('mode', LaserPointerMode.Draw);
+laserPointerInstance.set('mode', LaserPointerMode.Rectangle);
 laserPointerInstance.onCreateShape((shape) => {
   laserPointerInstance.addDrawings([shape]);
 });

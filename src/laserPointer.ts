@@ -275,13 +275,20 @@ export class LaserPointerInstance {
   private handleMousedown = (e: MouseEvent) => {
     if (e.button === 0) {
       this.mousedown = true;
+      const rel = this.mousePosToSvgPos(e.pageX, e.pageY);
       switch (this.options.mode) {
         case LaserPointerMode.Draw: {
           this.injectLatest();
           const p = this.getLatest();
-          if (!p) throw new Error('Unable to set initial "d" move because <path /> is missing');
-          const rel = this.mousePosToSvgPos(e.pageX, e.pageY);
+          if (!p) throw new Error('Unable to set intial <path /> move because <path /> is missing');
           p.setAttribute('d', `M${rel.x} ${rel.y}`);
+          break;
+        }
+        case LaserPointerMode.Rectangle: {
+          const p = this.getLatest();
+          if (!p) throw new Error('Unable to set initial <rect /> because latest <rect /> is missing');
+          p.setAttribute('x', rel.x.toString());
+          p.setAttribute('y', rel.y.toString());
           break;
         }
         default:
