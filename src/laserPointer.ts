@@ -102,6 +102,18 @@ export class LaserPointerInstance {
     return out;
   }
 
+  private absoluteSvgToRelativeSvg = (point: LaserPointerPoint): LaserPointerPoint => {
+    if (!this.svg) throw new Error('Unable to compute absoluteSvgToRelativeSvg because svg was not present in the DOM');
+    const { clientWidth, clientHeight } = this.svg;
+    return { x: point.x / clientWidth, y: point.y / clientHeight };
+  }
+
+  private relativeSvgToAbsoluteSvg = (point: LaserPointerPoint): LaserPointerPoint => {
+    if (!this.svg) throw new Error('Unable to compute relativeSvgToAbsoluteSvg because svg was not present in the DOM');
+    const { clientWidth, clientHeight } = this.svg;
+    return { x: clientWidth * point.x, y: clientHeight * point.y };
+  };
+
   private init() {
     this.injectSVG();
     this.injectLatest();
@@ -289,9 +301,9 @@ export class LaserPointerInstance {
       switch (this.options.mode) {
         case LaserPointerMode.Draw: {
           const d: LaserPointerDrawing = {
-            points: typeof this.options.simplifyDrawingPoints === 'function'
+            points: (typeof this.options.simplifyDrawingPoints === 'function'
               ? this.options.simplifyDrawingPoints(this.latestDrawingPoints)
-              : this.latestDrawingPoints,
+              : this.latestDrawingPoints).map(this.absoluteSvgToRelativeSvg),
             type: LaserPointerDrawingType.DRAWING,
           };
           this.onCreateShapeCallbacks.forEach(cb => cb(d));
@@ -343,8 +355,11 @@ export class LaserPointerInstance {
     this.onCreateShapeCallbacks.push(cb);
   }
 
-  public addDrawings(drawing: Shape[]) {
-    this.shapesToDraw = this.shapesToDraw.concat(drawing);
+  public addDrawings(drawings: Shape[]) {
+    this.shapesToDraw = this.shapesToDraw.concat(drawings.map((d) => {
+      if (d.type === LaserPointerDrawingType.DRAWING) return { ...d, points: d.points.map(this.relativeSvgToAbsoluteSvg) };
+      return d;
+    }));
     this.clearShapes();
     this.drawShapes();
   }
